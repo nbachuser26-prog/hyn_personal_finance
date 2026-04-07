@@ -6,52 +6,55 @@
     <title>Finance App</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Nunito:wght@400;700;800&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #f8f9fa; --panel: #ffffff; --text: #333333; --text-muted: #888888;
-            --border: #e0e0e0; --success: #4caf50; --shadow: 0 4px 20px rgba(0,0,0,0.06);
-            --radius: 24px; --accent: #ff69b4; --accent-light: #ffe4e1;
+            --border: #e0e0e0; --success: #4caf50; --shadow: 0 4px 25px rgba(0,0,0,0.05);
+            --radius: 24px; --accent: #ff69b4; --accent-light: rgba(255,105,180,0.15);
             --font-main: 'Quicksand', sans-serif;
         }
         [data-theme="dark"] {
-            --bg: #121212; --panel: #1e1e1e; --text: #ffffff; --text-muted: #aaaaaa;
-            --border: #333333; --shadow: 0 10px 30px rgba(0,0,0,0.5);
+            --bg: #0f111a; --panel: #1a1c26; --text: #ffffff; --text-muted: #a0a0a0;
+            --border: #2d303e; --shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
-        body { font-family: var(--font-main); background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.4s; }
-        .container { max-width: 1000px; margin: auto; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; padding-bottom: 80px;}
+        body { font-family: var(--font-main); background: var(--bg); color: var(--text); margin: 0; padding: 15px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; padding-bottom: 80px; }
         @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
         
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px 25px; background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
         .header-top h1 { margin: 0; font-size: 1.3rem; color: var(--accent); outline: none; cursor: text; }
+        .btn-icon { background: var(--accent-light); color: var(--accent); border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .btn-icon:hover { transform: rotate(90deg); background: var(--accent); color: white; }
 
         .section { background: var(--panel); border: 1px solid var(--border); padding: 25px; border-radius: var(--radius); margin-bottom: 20px; box-shadow: var(--shadow); }
-        h2 { margin-top: 0; color: var(--text); font-size: 1.1rem; border-bottom: 2px solid var(--accent-light); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+        h2 { margin-top: 0; color: var(--text); font-size: 1.15rem; border-bottom: 2px solid var(--accent-light); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
         
-        label { display: block; margin: 15px 0 5px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); }
+        label { display: block; margin: 15px 0 6px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         input, select, button { 
             width: 100%; padding: 14px; border-radius: 14px; border: 2px solid var(--border); 
             background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem;
             font-family: inherit; transition: 0.3s; -webkit-appearance: none;
         }
-        input:focus { outline: none; border-color: var(--accent); background: var(--panel); }
+        input:focus, select:focus { outline: none; border-color: var(--accent); background: var(--panel); }
         
-        button { cursor: pointer; background: var(--accent); color: white; border: none; font-weight: 800; margin-top: 15px; box-shadow: 0 6px 15px var(--accent-light); }
+        button { cursor: pointer; background: var(--accent); color: white; border: none; font-weight: 800; margin-top: 15px; box-shadow: 0 6px 20px var(--accent-light); }
         button:active { transform: scale(0.96); }
-        .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); margin-top: 0; padding: 6px 12px; box-shadow: none; width: auto;}
-        .btn-danger { background: #ff4d4f; box-shadow: 0 4px 12px rgba(255,77,79,0.2); }
+        .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); margin-top: 0; padding: 8px 15px; box-shadow: none; width: auto; }
+        .btn-danger { background: #ff4d4f; color: white; border: none; box-shadow: 0 4px 15px rgba(255, 77, 79, 0.2); }
 
-        .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .metric-card { background: var(--bg); padding: 18px; border-radius: 18px; text-align: center; border: 1px solid var(--border); }
+        .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+        .metric-card { background: var(--bg); padding: 18px; border-radius: 18px; text-align: center; border: 2px solid transparent; }
         .m-title { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 700; }
-        .m-val { font-size: 1.2rem; font-weight: 800; }
+        .m-val { font-size: 1.25rem; font-weight: 800; }
         
+        .progress-box { margin: 22px 0; }
         .progress-bg { height: 12px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 8px; }
-        .progress-fill { height: 100%; transition: 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); background: var(--accent); }
+        .progress-fill { height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        td { padding: 14px 10px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid var(--border); }
         
-        /* SETTINGS MODAL */
         #settings-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
@@ -59,279 +62,286 @@
             z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s;
         }
         #settings-modal.show { opacity: 1; pointer-events: auto; }
-        .modal-content { background: var(--panel); padding: 30px; border-radius: var(--radius); width: 90%; max-width: 380px; box-shadow: var(--shadow); }
-
+        .modal-content { background: var(--panel); padding: 30px; border-radius: 28px; width: 90%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        
         #toast {
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: #333; color: #fff; padding: 12px 25px; border-radius: 50px;
-            font-weight: bold; font-size: 0.9rem; transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); z-index: 2000;
+            background: var(--text); color: var(--bg); padding: 14px 28px; border-radius: 40px;
+            font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: 0.4s; z-index: 999;
         }
         #toast.show { transform: translateX(-50%) translateY(0); }
+        .chart-container { height: 250px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div id="toast">☁️ Đang đồng bộ...</div>
 
-<div id="settings-modal" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="border:none">⚙️ Thiết lập giao diện</h2>
+<div id="settings-modal" onclick="if(event.target.id==='settings-modal') closeSettings()">
+    <div class="modal-content">
+        <h2 style="border:none">⚙️ Thiết lập</h2>
         <label>Chế độ hiển thị:</label>
-        <select id="set-theme" onchange="updateConfig()">
-            <option value="system">Auto (Theo máy)</option>
+        <select id="set-theme" onchange="updateSettings()">
+            <option value="system">Auto (Hệ thống)</option>
             <option value="light">Sáng (Light)</option>
             <option value="dark">Tối (Dark)</option>
         </select>
-        
-        <label>Tông màu Pastel:</label>
-        <select id="set-color" onchange="updateConfig()">
+        <label>Màu nhấn chủ đạo:</label>
+        <select id="set-color" onchange="updateSettings()">
             <option value="pink">🌸 Pastel Pink</option>
             <option value="purple">🔮 Pastel Purple</option>
-            <option value="blue">💎 Pastel Blue</option>
-            <option value="red">🍎 Pastel Red</option>
+            <option value="blue">🌊 Pastel Blue</option>
+            <option value="red">🍑 Pastel Red</option>
         </select>
-
-        <label>Font chữ nịnh mắt:</label>
-        <select id="set-font" onchange="updateConfig()">
-            <option value="'Quicksand', sans-serif">Quicksand (Tròn trịa)</option>
-            <option value="'Nunito', sans-serif">Nunito (Hiện đại)</option>
-            <option value="'Comfortaa', sans-serif">Comfortaa (Cute)</option>
-            <option value="system-ui">Mặc định hệ thống</option>
+        <label>Font chữ:</label>
+        <select id="set-font" onchange="updateSettings()">
+            <option value="'Quicksand', sans-serif">Quicksand</option>
+            <option value="'Nunito', sans-serif">Nunito</option>
+            <option value="'Comfortaa', sans-serif">Comfortaa</option>
+            <option value="system-ui">Hệ thống</option>
         </select>
-        <button onclick="closeModal(null)" style="margin-top:20px">Hoàn tất</button>
+        <button onclick="closeSettings()" style="margin-top:25px">Hoàn tất</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header-top" style="grid-column: 1 / -1;">
-        <h1 id="app-title" contenteditable="true" onblur="updateConfig()">🌸 Tài chính Cá nhân</h1>
-        <button onclick="openModal()" style="width:45px; height:45px; border-radius:50%; margin:0; padding:0; background:var(--accent-light); color:var(--accent); font-size:1.2rem;">⚙️</button>
+        <h1 id="app-title" contenteditable="true" onblur="updateSettings()">🌸 Tài chính Cá nhân</h1>
+        <button class="btn-icon" onclick="document.getElementById('settings-modal').classList.add('show')">⚙️</button>
     </div>
 
     <div>
         <div class="section">
-            <h2>💰 Nguồn thu <button class="btn-outline" onclick="addIncomeField()">+ Thêm</button></h2>
-            <div id="income-list"></div>
-            <button onclick="saveIncomes()">💾 Lưu thu nhập</button>
+            <h2>💰 Nguồn Thu <button class="btn-outline btn-small" onclick="addIncomeField()">+ Thêm</button></h2>
+            <div id="income-inputs"></div>
+            <button onclick="saveIncomeData()">💾 Lưu thu nhập</button>
         </div>
 
         <div class="section">
-            <h2>✍️ Ghi chép chi tiêu</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <h2>✍️ Chi tiêu mới</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
                 <div><label>Ngày:</label><input type="date" id="tx-date"></div>
-                <div><label>Số tiền:</label><input type="number" id="tx-amt" placeholder="VNĐ" inputmode="numeric"></div>
+                <div><label>Số tiền:</label><input type="number" id="tx-amt" inputmode="numeric"></div>
             </div>
             <label>Hạng mục:</label>
             <select id="tx-cat">
                 <optgroup label="Thiết yếu (50%)">
                     <option value="🍲 Ăn uống|Thiết yếu">🍲 Ăn uống hàng ngày</option>
                     <option value="🏠 Trọ/Điện/Nước|Thiết yếu">🏠 Tiền trọ / Điện / Nước</option>
-                    <option value="⛽ Xăng xe|Thiết yếu">⛽ Xăng xe / Đi lại</option>
+                    <option value="⛽ Đi lại/Xăng|Thiết yếu">⛽ Đi lại / Xăng xe</option>
                 </optgroup>
-                <optgroup label="Cá nhân (30%)">
+                <optgroup label="Sở thích (30%)">
                     <option value="☕ Cafe/Trà sữa|Sở thích">☕ Cafe / Trà sữa</option>
-                    <option value="👗 Mua sắm|Sở thích">👗 Mua sắm / Quà cáp</option>
-                    <option value="🍻 Hẹn hò|Sở thích">🍻 Hẹn hò / Chơi bời</option>
+                    <option value="🍻 Hẹn hò/Chơi|Sở thích">🍻 Đi chơi / Hẹn hò</option>
+                    <option value="👗 Mua sắm|Sở thích">👗 Mua sắm quần áo</option>
                 </optgroup>
                 <option value="🔄 Khác|Khác">🔄 Các khoản khác</option>
             </select>
             <label>Ghi chú:</label>
-            <input type="text" id="tx-note" placeholder="Ăn gì, mua gì...">
+            <input type="text" id="tx-note" placeholder="...">
             <button onclick="addTransaction()">🚀 Ghi sổ ngay</button>
         </div>
     </div>
 
     <div>
         <div class="section">
-            <h2>📊 Báo cáo Budget</h2>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>Tháng quyết toán:</label><input type="month" id="view-month" onchange="renderUI()"></div>
-                <div><label>Ngày nhận tiếp:</label><input type="date" id="next-payday" onchange="savePayday()"></div>
-            </div>
-
+            <h2>📊 Budget Tháng <input type="month" id="view-month" onchange="renderUI()" style="width:auto; padding:5px; border:none; background:transparent; font-weight:800; cursor:pointer"></h2>
+            <div style="margin-bottom:15px"><label>🎯 Next Payday:</label><input type="date" id="next-payday" onchange="updateSettings()"></div>
+            
             <div class="metric-grid">
-                <div class="metric-card"><div class="m-title">Thiết yếu & Cá nhân (80%)</div><div class="m-val" id="v-80">0</div></div>
-                <div class="metric-card" style="border-color:var(--accent)"><div class="m-title">Số dư khả dụng</div><div class="m-val" id="v-avail" style="color:var(--accent)">0</div></div>
-                <div class="metric-card"><div class="m-title" id="burn-title">Hạn mức (Còn -- ngày)</div><div class="m-val" id="val-daily">0 đ</div></div>
-                <div class="metric-card"><div class="m-title">Chi tiêu hôm nay</div><div class="m-val" id="val-spent-today">0 đ</div></div>
+                <div class="metric-card">
+                    <div class="m-title">Khả dụng (80%)</div>
+                    <div class="m-val" id="val-avail" style="color:var(--accent)">0 đ</div>
+                </div>
+                <div class="metric-card">
+                    <div class="m-title" id="burn-title">Hạn mức / ngày</div>
+                    <div class="m-val" id="val-daily">0 đ</div>
+                </div>
             </div>
 
             <div class="progress-box">
-                <div style="display:flex; justify-content:space-between; font-size:0.85rem"><b>🏠 Thiết yếu (50%)</b><span id="t-needs">0/0</span></div>
-                <div class="progress-bg"><div id="b-needs" class="progress-fill"></div></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem"><span>🏠 Thiết yếu</span><span id="txt-needs">0/0</span></div>
+                <div class="progress-bg"><div id="bar-needs" class="progress-fill" style="background:#2196f3"></div></div>
             </div>
             <div class="progress-box">
-                <div style="display:flex; justify-content:space-between; font-size:0.85rem"><b>👑 Cá nhân (30%)</b><span id="t-wants">0/0</span></div>
-                <div class="progress-bg"><div id="b-wants" class="progress-fill"></div></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem"><span>👑 Cá nhân</span><span id="txt-wants">0/0</span></div>
+                <div class="progress-bg"><div id="bar-wants" class="progress-fill" style="background:#ff9800"></div></div>
             </div>
-            <div class="metric-card" style="margin-top:15px; background:var(--accent-light); border:none">
-                <div class="m-title" style="color:var(--accent)">💎 Quỹ tích lũy & tiết kiệm (20%)</div><div class="m-val" id="v-invest">0</div>
+            <div class="metric-card" style="border:1px solid var(--success); background:rgba(76,175,80,0.05); margin-top:15px">
+                <div class="m-title" style="color:var(--success)">💎 Tích lũy & Tiết kiệm (20%): <span id="val-invest">0 đ</span></div>
             </div>
         </div>
 
         <div class="section">
-            <h2>📋 Sao kê <button class="btn-outline btn-danger" style="color:white" onclick="clearData()">🚨 Reset</button></h2>
-            <div style="max-height: 400px; overflow-y: auto;">
-                <table id="tx-table"></table>
+            <h2>📈 Tổng quan năm <span id="year-label">2026</span></h2>
+            <div class="chart-container"><canvas id="yearChart"></canvas></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Sao kê tháng <button class="btn-outline btn-small btn-danger" style="color:white" onclick="resetAll()">Xóa hết</button></h2>
+            <div style="max-height:400px; overflow-y:auto">
+                <table><tbody id="tx-history"></tbody></table>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // === CẤU HÌNH CLOUD ===
-    const API_URL = "DÁN_LINK_WEB_APP_CỦA_BRO_VÀO_ĐÂY"; 
-
-    // STATE TỔNG - SẼ ĐƯỢC ĐẨY LÊN SHEET
-    let data = {
-        config: { title: "🌸 Tài chính Cá nhân", theme: "system", color: "pink", font: "'Quicksand', sans-serif" },
-        incomes: { "Lương": 0, "Trợ cấp": 0 },
-        transactions: [],
-        paydays: {}
-    };
+    const API_URL = "https://script.google.com/macros/s/AKfycbwmv_pzJ6Q9Md_eAxtnQDhI9G6OD9j2eSz8gBbhGCueyyD6wS8CgnuZiNFv2pV6LkedqQ/exec";
+    let state = { incomes: {}, transactions: [], settings: { theme: 'system', color: 'pink', font: 'Quicksand', title: '🌸 Tài chính Cá nhân', paydays: {} } };
+    let myChart = null;
 
     const COLORS = {
-        pink: { h: "#ff69b4", l: "#ffe4e1" },
-        purple: { h: "#ba55d3", l: "#f3e5f5" },
-        blue: { h: "#4facfe", l: "#e3f2fd" },
-        red: { h: "#ff5252", l: "#ffebee" }
+        pink: { hex: '#ff69b4', light: 'rgba(255,105,180,0.15)' },
+        purple: { hex: '#9d50bb', light: 'rgba(157,80,187,0.15)' },
+        blue: { hex: '#2193b0', light: 'rgba(33,147,176,0.15)' },
+        red: { hex: '#ff4b2b', light: 'rgba(255,75,43,0.15)' }
     };
 
-    const format = (n) => new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' đ';
-    const getM = (d) => d.substring(0, 7);
-    const getToday = () => new Date().toISOString().split('T')[0];
-
-    // --- SYNC ENGINE ---
-    async function sync(showMsg = true) {
-        if(showMsg) toast("☁️ Đang đồng bộ...");
-        try {
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
-            if(showMsg) toast("✅ Đã lưu!", true);
-        } catch (e) { toast("⚠️ Lỗi kết nối!"); }
-    }
-
-    async function init() {
-        toast("☁️ Đang tải dữ liệu...");
+    // --- SYNC ---
+    async function loadData() {
+        showToast("☁️ Đang kết nối...");
         try {
             const res = await fetch(API_URL);
             const cloudData = await res.json();
-            if(cloudData.config) data = cloudData; 
-            applyConfig();
-            renderIncomes();
+            if (cloudData.transactions) state = cloudData;
+            if (!state.settings) state.settings = { theme: 'system', color: 'pink', font: 'Quicksand', title: '🌸 Tài chính Cá nhân', paydays: {} };
+            applySettingsUI();
+            renderIncomeInputs();
             renderUI();
-        } catch (e) { toast("⚠️ Lỗi tải data!"); }
-        hideToast();
+        } catch (e) { showToast("⚠️ Offline Mode"); }
     }
 
-    // --- CONFIG & THEME ---
-    function applyConfig() {
-        const c = data.config;
-        document.getElementById('app-title').innerText = c.title;
-        document.getElementById('set-theme').value = c.theme;
-        document.getElementById('set-color').value = c.color;
-        document.getElementById('set-font').value = c.font;
+    async function sync() {
+        showToast("☁️ Đồng bộ...");
+        try {
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify(state) });
+            showToast("✅ Đã lưu!", true);
+        } catch (e) { showToast("⚠️ Lỗi lưu!"); }
+    }
 
-        if(c.theme === 'system') document.documentElement.removeAttribute('data-theme');
-        else document.documentElement.setAttribute('data-theme', c.theme);
-
+    // --- UI SETTINGS ---
+    function applySettingsUI() {
+        const s = state.settings;
+        document.documentElement.setAttribute('data-theme', s.theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s.theme);
         const root = document.documentElement;
-        root.style.setProperty('--accent', COLORS[c.color].h);
-        root.style.setProperty('--accent-light', COLORS[c.color].l);
-        root.style.setProperty('--font-main', c.font);
+        root.style.setProperty('--accent', COLORS[s.color].hex);
+        root.style.setProperty('--accent-light', COLORS[s.color].light);
+        root.style.setProperty('--font-main', s.font.includes(',') ? s.font : `'${s.font}', sans-serif`);
+        document.getElementById('app-title').innerText = s.title;
+        document.getElementById('set-theme').value = s.theme;
+        document.getElementById('set-color').value = s.color;
+        document.getElementById('set-font').value = s.font;
     }
 
-    function updateConfig() {
-        data.config = {
-            title: document.getElementById('app-title').innerText,
-            theme: document.getElementById('set-theme').value,
-            color: document.getElementById('set-color').value,
-            font: document.getElementById('set-font').value
-        };
-        applyConfig();
-        sync();
-    }
-
-    // --- INCOME LOGIC ---
-    function renderIncomes() {
-        const div = document.getElementById('income-list');
-        div.innerHTML = '';
-        for (let k in data.incomes) {
-            div.innerHTML += `<div style="display:flex; gap:10px; margin-bottom:10px">
-                <input type="text" value="${k}" onblur="renameInc('${k}', this.value)" style="flex:1; font-weight:700; border:none; background:transparent">
-                <input type="number" value="${data.incomes[k]}" onchange="data.incomes['${k}']=+this.value" style="flex:1" inputmode="numeric">
-                <button class="btn-outline" style="border:none; margin:0" onclick="delete data.incomes['${k}']; renderIncomes()">❌</button>
-            </div>`;
-        }
-    }
-    function addIncomeField() { const n = prompt("Tên nguồn thu:"); if(n) { data.incomes[n]=0; renderIncomes(); } }
-    function renameInc(oldK, newK) { if(oldK !== newK) { data.incomes[newK] = data.incomes[oldK]; delete data.incomes[oldK]; renderIncomes(); } }
-    function saveIncomes() { sync(); renderUI(); }
-
-    // --- TRANSACTION LOGIC ---
-    function addTransaction() {
-        const date = document.getElementById('tx-date').value;
-        const amt = +document.getElementById('tx-amt').value;
-        const [cat, bucket] = document.getElementById('tx-cat').value.split('|');
-        const note = document.getElementById('tx-note').value || cat;
-        if(!date || !amt) return alert("Thiếu tiền hoặc ngày kìa!");
-        data.transactions.push({ id: Date.now(), date, amt, cat, bucket, note });
-        document.getElementById('tx-amt').value = '';
-        document.getElementById('tx-note').value = '';
+    function updateSettings() {
+        state.settings.theme = document.getElementById('set-theme').value;
+        state.settings.color = document.getElementById('set-color').value;
+        state.settings.font = document.getElementById('set-font').value;
+        state.settings.title = document.getElementById('app-title').innerText;
+        const m = document.getElementById('view-month').value;
+        state.settings.paydays[m] = document.getElementById('next-payday').value;
+        applySettingsUI();
         renderUI();
         sync();
     }
-    function delTx(id) { if(confirm("Xóa nhé?")) { data.transactions = data.transactions.filter(t => t.id !== id); renderUI(); sync(); } }
-    function savePayday() { data.paydays[getM(document.getElementById('view-month').value)] = document.getElementById('next-payday').value; sync(); renderUI(); }
 
-    // --- RENDER UI ---
+    function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
+
+    // --- INCOME ---
+    function renderIncomeInputs() {
+        const div = document.getElementById('income-inputs');
+        div.innerHTML = '';
+        if (Object.keys(state.incomes).length === 0) state.incomes = {"Trợ cấp": 0};
+        for (let k in state.incomes) {
+            div.innerHTML += `<div style="display:flex; gap:10px; margin-bottom:8px">
+                <input type="text" value="${k}" onblur="renameInc('${k}', this.value)" style="flex:1; border:none; background:transparent; font-weight:bold">
+                <input type="number" value="${state.incomes[k]}" onblur="updateIncValue('${k}', this.value)" style="flex:1" inputmode="numeric">
+                <button onclick="deleteInc('${k}')" style="width:40px; margin:0; background:#ff4d4f">×</button>
+            </div>`;
+        }
+    }
+    function addIncomeField() { const n = prompt("Tên nguồn thu:"); if(n) { state.incomes[n] = 0; renderIncomeInputs(); } }
+    function deleteInc(k) { delete state.incomes[k]; renderIncomeInputs(); renderUI(); sync(); }
+    function renameInc(oldK, newK) { if(oldK !== newK) { state.incomes[newK] = state.incomes[oldK]; delete state.incomes[oldK]; sync(); } }
+    function updateIncValue(k, v) { state.incomes[k] = parseFloat(v) || 0; renderUI(); sync(); }
+    function saveIncomeData() { sync(); }
+
+    // --- TRANSACTIONS ---
+    function addTransaction() {
+        const amt = parseFloat(document.getElementById('tx-amt').value);
+        const date = document.getElementById('tx-date').value;
+        const [cat, bucket] = document.getElementById('tx-cat').value.split('|');
+        if (!amt || !date) return;
+        state.transactions.push({ id: Date.now(), amt, date, cat, bucket, note: document.getElementById('tx-note').value });
+        document.getElementById('tx-amt').value = '';
+        document.getElementById('tx-note').value = '';
+        renderUI(); sync();
+    }
+    function deleteTx(id) { state.transactions = state.transactions.filter(t => t.id !== id); renderUI(); sync(); }
+    function resetAll() { if(confirm("Xóa hết?")) { state.transactions = []; renderUI(); sync(); } }
+
+    // --- RENDER ---
     function renderUI() {
         const m = document.getElementById('view-month').value;
-        const monthTx = data.transactions.filter(t => getM(t.date) === m);
-        let inc = Object.values(data.incomes).reduce((a,b)=>a+b, 0);
-        let n=0, w=0, o=0, tdy=0;
-        monthTx.forEach(t => {
-            if(t.bucket==='Thiết yếu') n+=t.amt; else if(t.bucket==='Sở thích') w+=t.amt; else o+=t.amt;
-            if(t.date === getToday()) tdy+=t.amt;
+        const monthTx = state.transactions.filter(t => t.date.startsWith(m));
+        const totalInc = Object.values(state.incomes).reduce((a,b)=>a+b, 0);
+        let sNeeds = 0, sWants = 0, sOther = 0;
+        monthTx.forEach(t => { 
+            if(t.bucket==='Thiết yếu') sNeeds+=t.amt; 
+            else if(t.bucket==='Sở thích') sWants+=t.amt; 
+            else sOther+=t.amt; 
         });
-        const l80 = inc * 0.8, avail = l80 - (n+w+o);
-        let pday = data.paydays[m] || new Date(m.split('-')[0], m.split('-')[1], 0).toISOString().split('T')[0];
-        document.getElementById('next-payday').value = pday;
-        let days = Math.ceil((new Date(pday) - new Date(getToday()))/(864e5)); if(days<=0) days=1;
-        
-        document.getElementById('v-80').innerText = format(l80);
-        document.getElementById('v-avail').innerText = format(avail);
-        document.getElementById('v-rem-days').innerText = `Còn ${days} ngày`;
-        document.getElementById('v-daily').innerText = format(avail>0 ? avail/days : 0);
-        document.getElementById('v-today').innerText = format(tdy);
-        document.getElementById('v-invest').innerText = format(inc * 0.2);
-        
-        document.getElementById('t-needs').innerText = `${format(n)} / ${format(inc*0.5)}`;
-        document.getElementById('b-needs').style.width = Math.min(n/(inc*0.5)*100, 100) + '%';
-        document.getElementById('t-wants').innerText = `${format(w)} / ${format(inc*0.3)}`;
-        document.getElementById('b-wants').style.width = Math.min(w/(inc*0.3)*100, 100) + '%';
 
-        const table = document.getElementById('tx-table'); table.innerHTML = '';
+        const avail = (totalInc * 0.8) - (sNeeds + sWants + sOther);
+        const payday = state.settings.paydays[m] || new Date(m.split('-')[0], m.split('-')[1], 0).toISOString().split('T')[0];
+        document.getElementById('next-payday').value = payday;
+        
+        const days = Math.ceil((new Date(payday) - new Date()) / 86400000) || 1;
+        document.getElementById('val-avail').innerText = avail.toLocaleString() + ' đ';
+        document.getElementById('val-daily').innerText = Math.max(0, Math.floor(avail/(days>0?days:1)/1000)*1000).toLocaleString() + ' đ';
+        document.getElementById('burn-title').innerText = `Hạn mức (Còn ${days} ngày)`;
+        document.getElementById('txt-needs').innerText = `${sNeeds.toLocaleString()} / ${(totalInc*0.5).toLocaleString()}`;
+        document.getElementById('bar-needs').style.width = Math.min(100, (sNeeds/(totalInc*0.5||1))*100) + '%';
+        document.getElementById('txt-wants').innerText = `${sWants.toLocaleString()} / ${(totalInc*0.3).toLocaleString()}`;
+        document.getElementById('bar-wants').style.width = Math.min(100, (sWants/(totalInc*0.3||1))*100) + '%';
+        document.getElementById('val-invest').innerText = (totalInc*0.2).toLocaleString() + ' đ';
+
+        const history = document.getElementById('tx-history');
+        history.innerHTML = '';
         monthTx.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(t => {
-            table.innerHTML += `<tr>
-                <td><b>${t.date.split('-')[2]}</b></td>
-                <td>${t.cat.split(' ')[0]}<br><small>${t.note}</small></td>
-                <td style="text-align:right"><b>${format(t.amt)}</b></td>
-                <td><button class="btn-outline" style="border:none; padding:0" onclick="delTx(${t.id})">❌</button></td>
+            history.innerHTML += `<tr>
+                <td style="font-weight:800">${t.date.split('-')[2]}</td>
+                <td>${t.cat.split(' ')[0]} <br><small>${t.note}</small></td>
+                <td style="text-align:right"><b>${t.amt.toLocaleString()}</b> <button onclick="deleteTx(${t.id})" style="width:auto; margin:0; padding:2px 5px; background:none; color:red; box-shadow:none">×</button></td>
             </tr>`;
+        });
+        renderChart(m.split('-')[0]);
+    }
+
+    function renderChart(year) {
+        document.getElementById('year-label').innerText = year;
+        const ctx = document.getElementById('yearChart').getContext('2d');
+        const months = Array.from({length: 12}, (_, i) => `${year}-${String(i+1).padStart(2, '0')}`);
+        const data = months.map(m => state.transactions.filter(t => t.date.startsWith(m)).reduce((a,b)=>a+b.amt, 0));
+        
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'], datasets: [{ label: 'Chi tiêu', data: data, backgroundColor: COLORS[state.settings.color].hex, borderRadius: 8 }] },
+            options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
         });
     }
 
-    // --- HELPER ---
-    function openModal() { document.getElementById('settings-modal').classList.add('show'); }
-    function closeModal(e) { if(!e || e.target.id === 'settings-modal') document.getElementById('settings-modal').classList.remove('show'); }
-    function toast(m, s) { const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show'); if(s) setTimeout(hideToast, 2000); }
-    function hideToast() { document.getElementById('toast').classList.remove('show'); }
-    function clearData() { if(confirm("Xóa hết thật à?")) { data.transactions=[]; renderUI(); sync(); } }
+    function showToast(m, s=false) { 
+        const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); 
+        if(s) setTimeout(()=>t.classList.remove('show'), 2000); 
+    }
 
     window.onload = () => {
-        document.getElementById('view-month').value = getM(getToday());
-        document.getElementById('tx-date').value = getToday();
-        init();
+        document.getElementById('view-month').value = new Date().toISOString().substring(0, 7);
+        document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
+        loadData();
     };
 </script>
 </body>
