@@ -127,13 +127,14 @@
             <select id="tx-cat">
                 <optgroup label="Thiết yếu (50%)">
                     <option value="🍲 Ăn uống|Thiết yếu">🍲 Ăn uống hàng ngày</option>
-                    <option value="🏠 Trọ/Điện/Nước|Thiết yếu">🏠 Tiền trọ / Điện / Nước</option>
+                    <option value="🪥 Đồ Skincare/Vệ sinh|Thiết yếu">🪥 Đồ Skincare / Vệ sinh</option>
                     <option value="⛽ Đi lại/Xăng|Thiết yếu">⛽ Đi lại / Xăng xe</option>
                 </optgroup>
-                <optgroup label="Sở thích (30%)">
-                    <option value="☕ Cafe/Trà sữa|Sở thích">☕ Cafe / Trà sữa</option>
-                    <option value="🍻 Hẹn hò/Chơi|Sở thích">🍻 Đi chơi / Hẹn hò</option>
-                    <option value="👗 Mua sắm|Sở thích">👗 Mua sắm quần áo</option>
+                <optgroup label="Cá nhân (30%)">
+                    <option value="☕ Cafe/Trà sữa|Cá nhân">☕ Cafe / Trà sữa</option>
+                    <option value="🎮 Hẹn hò/Chơi|Cá nhân">🍻 Đi chơi / Hẹn hò</option>
+                    <option value="🎁 Hoa tươi/Quà tặng|Cá nhân">🎁 Hoa tươi / Quà tặng</option>
+                    <option value="👗 Mua sắm|Cá nhân">👗 Mua sắm quần áo</option>
                 </optgroup>
                 <option value="🔄 Khác|Khác">🔄 Các khoản khác</option>
             </select>
@@ -289,7 +290,7 @@
         let sNeeds = 0, sWants = 0, sOther = 0;
         monthTx.forEach(t => { 
             if(t.bucket==='Thiết yếu') sNeeds+=t.amt; 
-            else if(t.bucket==='Sở thích') sWants+=t.amt; 
+            else if(t.bucket==='Cá nhân') sWants+=t.amt; 
             else sOther+=t.amt; 
         });
 
