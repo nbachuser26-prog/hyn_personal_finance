@@ -3,430 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tài Chính Cá Nhân</title>
+    <title>Finance App For My Queen 👑</title>
     <style>
-        /* CSS mô phỏng giao diện Dark Mode của Streamlit */
         :root {
-            --bg-color: #0e1117;
-            --panel-bg: #262730;
-            --text-main: #fafafa;
-            --text-muted: #9c9d9f;
-            --accent: #ff4b4b;
-            --border-color: #464b54;
-            --success: #2e7d32;
-            --warning: #ed6c02;
-            --danger: #d32f2f;
-            --radius: 8px;
+            --bg: #0e1117; --panel: #262730; --text: #fafafa;
+            --accent: #ff4b4b; --border: #464b54; --success: #2e7d32;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .container { grid-template-columns: 1fr; }
-        }
-
-        h2, h3, h4 { margin-top: 0; }
-        .section { background: var(--bg-color); border: 1px solid var(--border-color); padding: 20px; border-radius: var(--radius); margin-bottom: 20px; }
-        .divider { border-bottom: 1px solid var(--border-color); margin: 20px 0; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
         
-        label { display: block; margin-bottom: 5px; font-size: 0.9em; font-weight: 600; }
-        input, select, button {
-            width: 100%; box-sizing: border-box;
-            padding: 10px; margin-bottom: 15px;
-            border-radius: 6px; border: 1px solid var(--border-color);
-            background-color: var(--panel-bg); color: var(--text-main);
-            font-family: inherit;
+        .section { background: var(--panel); border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        h2 { margin-top: 0; color: var(--accent); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        label { display: block; margin: 10px 0 5px; font-size: 0.85rem; opacity: 0.8; }
+        input, select, button { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0e1117; color: white; box-sizing: border-box; }
+        button { cursor: pointer; background: var(--accent); border: none; font-weight: bold; margin-top: 15px; transition: 0.2s; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .metric-card { background: #0e1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .m-title { font-size: 0.75rem; color: #aaa; margin-bottom: 5px; }
+        .m-val { font-size: 1.1rem; font-weight: bold; }
+        
+        .progress-box { margin: 15px 0; }
+        .progress-bg { height: 8px; background: #444; border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .progress-fill { height: 100%; width: 0%; transition: 0.5s; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 15px; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); }
+        th { color: #888; }
+
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+            visibility: hidden;
         }
-        input:focus, select:focus { outline: none; border-color: var(--accent); }
-        
-        button { background-color: var(--panel-bg); cursor: pointer; transition: 0.2s; border: 1px solid var(--border-color); }
-        button:hover { border-color: var(--accent); color: var(--accent); }
-        .btn-primary { background-color: var(--accent); color: white; border: none; }
-        .btn-primary:hover { background-color: #ff3333; color: white; }
-
-        .metric-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .metric-card { background: var(--panel-bg); padding: 15px; border-radius: var(--radius); text-align: center; }
-        .metric-title { font-size: 0.8em; color: var(--text-muted); margin-bottom: 5px; }
-        .metric-value { font-size: 1.2em; font-weight: bold; }
-        .delta-good { color: #4caf50; font-size: 0.85em; }
-        .delta-bad { color: #f44336; font-size: 0.85em; }
-
-        .progress-container { background: var(--panel-bg); border-radius: 10px; height: 10px; width: 100%; margin-bottom: 5px; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border-color); }
-        th { color: var(--text-muted); }
-        
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row > div { flex: 1; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top:15px;">Đang đồng bộ với Cloud...</p>
+</div>
+
 <div class="container">
     <div>
         <div class="section">
-            <h2>1. Nguồn Thu (Income)</h2>
-            <div id="income-list"></div>
-            <button class="btn-primary" onclick="saveIncomes()">Lưu số liệu Thu Nhập</button>
+            <h2>💰 Nguồn Thu (Income)</h2>
+            <div id="income-inputs">
+                <label>Trợ cấp Phụ huynh:</label>
+                <input type="number" class="inc-val" data-key="Trợ cấp Phụ huynh" value="0">
+                <label>Tiền dạy Gia sư:</label>
+                <input type="number" class="inc-val" data-key="Tiền dạy Gia sư" value="0">
+                <label>Nguồn khác:</label>
+                <input type="number" class="inc-val" data-key="Nguồn khác" value="0">
+            </div>
+            <button onclick="saveData()">Lưu & Đồng bộ Thu Nhập</button>
         </div>
 
         <div class="section">
-            <h2>2. Ghi chép Chi tiêu</h2>
-            <div class="flex-row">
-                <div>
-                    <label>Ngày giao dịch:</label>
-                    <input type="date" id="tx-date">
-                </div>
-                <div>
-                    <label>Ghi chú:</label>
-                    <input type="text" id="tx-desc" placeholder="VD: Bún cá...">
-                </div>
-            </div>
-            <div class="flex-row">
-                <div>
-                    <label>Số tiền (VNĐ):</label>
-                    <input type="number" id="tx-amount" min="0" step="1000">
-                </div>
-                <div>
-                    <label>Hạng mục:</label>
-                    <select id="tx-category"></select>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="addTransaction()">Ghi sổ Chi Tiêu</button>
-        </div>
-
-        <div class="section">
-            <h2>🗑️ Reset Dữ liệu</h2>
-            <button onclick="resetData()" style="color: var(--danger); border-color: var(--danger);">🚨 Xóa Toàn Bộ Lịch Sử Bằng Tay</button>
+            <h2>✍️ Ghi chép Chi tiêu</h2>
+            <label>Ngày:</label>
+            <input type="date" id="tx-date">
+            <label>Số tiền (VNĐ):</label>
+            <input type="number" id="tx-amt" placeholder="VD: 50000">
+            <label>Hạng mục:</label>
+            <select id="tx-cat">
+                <optgroup label="Thiết yếu (50%)">
+                    <option value="🍲 Ăn uống|Thiết yếu">🍲 Ăn uống hàng ngày</option>
+                    <option value="🏠 Trọ/Điện/Nước|Thiết yếu">🏠 Tiền trọ / Điện / Nước</option>
+                    <option value="⛽ Đi lại/Xăng|Thiết yếu">⛽ Đi lại / Xăng xe</option>
+                </optgroup>
+                <optgroup label="Sở thích (30%)">
+                    <option value="☕ Cafe/Trà sữa|Sở thích">☕ Cafe / Trà sữa</option>
+                    <option value="🍻 Đi chơi/Hẹn hò|Sở thích">🍻 Đi chơi / Hẹn hò</option>
+                    <option value="👗 Mua sắm|Sở thích">👗 Mua sắm quần áo</option>
+                </optgroup>
+                <optgroup label="Khác">
+                    <option value="🔄 Chi hộ/Trả nợ|Khác">🔄 Chi hộ / Trả nợ</option>
+                    <option value="🎁 Quà cáp|Sở thích">🎁 Quà cáp / Biếu tặng</option>
+                </optgroup>
+            </select>
+            <label>Ghi chú:</label>
+            <input type="text" id="tx-note" placeholder="VD: Ăn bún chả...">
+            <button onclick="addTransaction()">Ghi sổ Chi Tiêu</button>
         </div>
     </div>
 
     <div>
         <div class="section">
-            <h2>Báo Cáo & Phân Tích</h2>
-            <div class="flex-row">
-                <div>
+            <h2>📊 Báo Cáo & Budget</h2>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
                     <label>Tháng quyết toán:</label>
-                    <input type="month" id="report-month" onchange="renderUI()">
+                    <input type="month" id="view-month" onchange="renderUI()">
                 </div>
-                <div>
-                    <label>🎯 Ngày nhận lương đợt tới:</label>
-                    <input type="date" id="next-payday" onchange="savePayday()">
+                <div style="flex: 1;">
+                    <label>🎯 Ngày nhận tiền tiếp:</label>
+                    <input type="date" id="next-payday" onchange="savePaydayOnly()">
                 </div>
             </div>
 
-            <div class="divider"></div>
-            <h3>⏳ NGÂN SÁCH DAILY BURN RATE</h3>
-            
             <div class="metric-grid">
                 <div class="metric-card">
-                    <div class="metric-title">Quỹ Sống+Chơi (80%)</div>
-                    <div class="metric-value" id="m-budget80">0 đ</div>
+                    <div class="m-title">Số dư Khả dụng</div>
+                    <div class="m-val" id="val-avail">0 đ</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-title">Số dư Khả dụng</div>
-                    <div class="metric-value" id="m-available">0 đ</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-title" id="m-limit-title">Hạn mức (Còn 0 ngày)</div>
-                    <div class="metric-value" id="m-daily-limit">0 đ</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-title">Hôm nay đã tiêu</div>
-                    <div class="metric-value" id="m-spent-today">0 đ</div>
-                    <div id="m-delta"></div>
+                    <div class="m-title" id="burn-title">Hạn mức Daily</div>
+                    <div class="m-val" id="val-daily">0 đ</div>
                 </div>
             </div>
 
-            <div class="divider"></div>
-            <p><strong>🏦 Thiết yếu (50%):</strong> <span id="bar-needs-text">0 / 0 đ</span></p>
-            <div class="progress-container"><div class="progress-bar" id="bar-needs" style="background:#2196f3;"></div></div>
-            
-            <p style="margin-top:15px;"><strong>🎸 Sở thích (30%):</strong> <span id="bar-wants-text">0 / 0 đ</span></p>
-            <div class="progress-container"><div class="progress-bar" id="bar-wants" style="background:#ff9800;"></div></div>
-
-            <div class="flex-row" style="margin-top: 20px;">
-                <div class="metric-card" style="border: 1px solid #4caf50;">
-                    <div class="metric-title" style="color:#4caf50">💎 Tích lũy / Đầu Tư (20%)</div>
-                    <div class="metric-value" id="box-invest">0 đ</div>
+            <div class="progress-box">
+                <div style="display:flex; justify-content: space-between; font-size: 0.8rem;">
+                    <span>🏠 Thiết yếu (50%)</span><span id="txt-needs">0/0</span>
                 </div>
-                <div class="metric-card" style="border: 1px solid var(--border-color);">
-                    <div class="metric-title">🔄 Khác (Đã chi)</div>
-                    <div class="metric-value" id="box-other">0 đ</div>
-                </div>
+                <div class="progress-bg"><div id="bar-needs" class="progress-fill" style="background: #2196f3;"></div></div>
             </div>
 
-            <div class="divider"></div>
-            <h3>📋 BẢNG SAO KÊ CHI TIÊU</h3>
-            <p>Tổng dòng tiền ra: <strong id="total-spent" style="font-size: 1.2em; color: var(--accent);">0 đ</strong></p>
+            <div class="progress-box">
+                <div style="display:flex; justify-content: space-between; font-size: 0.8rem;">
+                    <span>🎸 Sở thích (30%)</span><span id="txt-wants">0/0</span>
+                </div>
+                <div class="progress-bg"><div id="bar-wants" class="progress-fill" style="background: #ff9800;"></div></div>
+            </div>
+
+            <div class="metric-card" style="margin-top: 10px; border-color: #2e7d32;">
+                <div class="m-title" style="color:#4caf50">💎 Quỹ Tích lũy (20%)</div>
+                <div class="m-val" id="val-invest">0 đ</div>
+            </div>
+
+            <h2>📋 Sao kê tháng này</h2>
             <table>
-                <thead>
-                    <tr>
-                        <th>Ngày</th>
-                        <th>Hạng mục</th>
-                        <th>Ghi chú</th>
-                        <th style="text-align:right;">Số tiền</th>
-                    </tr>
-                </thead>
-                <tbody id="tx-table-body"></tbody>
+                <thead><tr><th>Ngày</th><th>Mục</th><th>Tiền</th></tr></thead>
+                <tbody id="tx-history"></tbody>
             </table>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 1. CONFIG & DATA MAPPING ---
-    const CATEGORIES = {
-        "🍲 Ăn uống hàng ngày": "Thiết yếu",
-        "🛒 Siêu thị / Tạp hóa": "Thiết yếu",
-        "🏠 Tiền trọ / Điện / Nước": "Thiết yếu",
-        "⛽ Đi lại / Xăng xe": "Thiết yếu",
-        "💊 Y tế / Sức khỏe": "Thiết yếu",
-        "☕ Cafe / Trà sữa": "Sở thích",
-        "🎬 Giải trí / Phim ảnh": "Sở thích",
-        "👕 Mua sắm Quần áo": "Sở thích",
-        "💻 Đồ công nghệ / Game": "Sở thích",
-        "🍻 Nhậu / Hẹn hò": "Sở thích",
-        "✈️ Du lịch / Phượt": "Sở thích",
-        "🔄 Chi hộ / Khác": "Khác"
-    };
+    // === CẤU HÌNH ===
+    const API_URL = "https://script.google.com/macros/s/AKfycbwmv_pzJ6Q9Md_eAxtnQDhI9G6OD9j2eSz8gBbhGCueyyD6wS8CgnuZiNFv2pV6LkedqQ/exec"; 
 
-    const DEFAULT_INCOMES = ["Lương chính", "Trợ cấp", "Làm thêm"];
-
-    // --- 2. STATE MANAGEMENT (LocalStorage) ---
     let state = {
         incomes: {},
         transactions: [],
-        paydays: {} // Lưu payday theo tháng: {"2026-04": "2026-04-18"}
+        paydays: {}
     };
 
-    function loadState() {
-        const saved = localStorage.getItem('finance_app_data');
-        if (saved) {
-            state = JSON.parse(saved);
-        } else {
-            DEFAULT_INCOMES.forEach(k => state.incomes[k] = 0);
-        }
-        if(!state.paydays) state.paydays = {};
+    const formatVND = (n) => new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' đ';
+    const getMonthKey = (d) => d.substring(0, 7);
+    const todayStr = () => new Date().toISOString().split('T')[0];
+
+    async function loadData() {
+        showLoading(true);
+        try {
+            const res = await fetch(API_URL);
+            state = await res.json();
+            if (!state.incomes) state.incomes = {};
+            if (!state.transactions) state.transactions = [];
+            if (!state.paydays) state.paydays = {};
+            
+            // Đổ dữ liệu vào input thu nhập
+            document.querySelectorAll('.inc-val').forEach(input => {
+                input.value = state.incomes[input.dataset.key] || 0;
+            });
+            
+            renderUI();
+        } catch (e) { alert("Lỗi tải dữ liệu từ Cloud!"); }
+        showLoading(false);
     }
 
-    function saveState() {
-        localStorage.setItem('finance_app_data', JSON.stringify(state));
-    }
+    async function saveData() {
+        showLoading(true);
+        // Lấy dữ liệu từ input thu nhập
+        document.querySelectorAll('.inc-val').forEach(input => {
+            state.incomes[input.dataset.key] = parseFloat(input.value) || 0;
+        });
 
-    // --- 3. UTILS ---
-    const formatMoney = (num) => new Intl.NumberFormat('vi-VN').format(Math.round(num));
-    const getTodayStr = () => new Date().toISOString().split('T')[0];
-    const getMonthStr = (dateStr) => dateStr.substring(0, 7);
-
-    // --- 4. UI LOGIC ---
-    function init() {
-        loadState();
-        
-        // Init dropdowns
-        const catSelect = document.getElementById('tx-category');
-        for (let cat in CATEGORIES) {
-            let opt = document.createElement('option');
-            opt.value = cat; opt.innerHTML = cat;
-            catSelect.appendChild(opt);
-        }
-
-        // Set default dates
-        document.getElementById('tx-date').value = getTodayStr();
-        document.getElementById('report-month').value = getMonthStr(getTodayStr());
-
-        renderUI();
-    }
-
-    function renderUI() {
-        renderIncomes();
-        calculateMetrics();
-        renderTable();
-    }
-
-    function renderIncomes() {
-        const list = document.getElementById('income-list');
-        list.innerHTML = '';
-        for (let key in state.incomes) {
-            list.innerHTML += `
-                <div>
-                    <label>${key}:</label>
-                    <input type="number" id="inc_${key}" value="${state.incomes[key]}" step="100000">
-                </div>
-            `;
-        }
-    }
-
-    function saveIncomes() {
-        for (let key in state.incomes) {
-            const val = parseFloat(document.getElementById(`inc_${key}`).value) || 0;
-            state.incomes[key] = val;
-        }
-        saveState();
-        renderUI();
-        alert("Đã lưu thu nhập!");
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(state)
+            });
+            renderUI();
+        } catch (e) { alert("Lỗi lưu dữ liệu!"); }
+        showLoading(false);
     }
 
     function addTransaction() {
         const date = document.getElementById('tx-date').value;
-        const amount = parseFloat(document.getElementById('tx-amount').value);
-        let desc = document.getElementById('tx-desc').value;
-        const cat = document.getElementById('tx-category').value;
+        const amt = parseFloat(document.getElementById('tx-amt').value);
+        const [cat, bucket] = document.getElementById('tx-cat').value.split('|');
+        const note = document.getElementById('tx-note').value || cat;
 
-        if (!date || isNaN(amount) || amount <= 0) return alert("Nhập sai số tiền hoặc ngày!");
-        if (!desc) desc = cat;
+        if (!date || !amt) return alert("Vui lòng nhập đủ ngày và số tiền!");
 
-        state.transactions.push({
-            date: date,
-            desc: desc,
-            amount: amount,
-            category: cat,
-            bucket: CATEGORIES[cat]
-        });
-
-        // Clear form
-        document.getElementById('tx-amount').value = '';
-        document.getElementById('tx-desc').value = '';
-        
-        saveState();
-        renderUI();
+        state.transactions.push({ date, amt, cat, bucket, note });
+        document.getElementById('tx-amt').value = '';
+        document.getElementById('tx-note').value = '';
+        saveData();
     }
 
-    function savePayday() {
-        const curMonth = document.getElementById('report-month').value;
-        state.paydays[curMonth] = document.getElementById('next-payday').value;
-        saveState();
-        renderUI();
+    function savePaydayOnly() {
+        const m = document.getElementById('view-month').value;
+        state.paydays[m] = document.getElementById('next-payday').value;
+        saveData();
     }
 
-    function calculateMetrics() {
-        const curMonth = document.getElementById('report-month').value;
+    function renderUI() {
+        const curMonth = document.getElementById('view-month').value;
+        const monthTx = state.transactions.filter(t => getMonthKey(t.date) === curMonth);
         
-        // Lấy transactions tháng này
-        const monthTx = state.transactions.filter(t => getMonthStr(t.date) === curMonth);
-        
-        // Tính tổng thu nhập
-        let totalIncome = Object.values(state.incomes).reduce((a, b) => a + b, 0);
-        
-        // Tính chi tiêu
-        let actNeeds = 0, actWants = 0, actOther = 0, totalSpent = 0;
+        let totalInc = Object.values(state.incomes).reduce((a,b) => a+b, 0);
+        let spentNeeds = 0, spentWants = 0, spentOther = 0;
         let spentToday = 0;
-        const todayStr = getTodayStr();
 
         monthTx.forEach(t => {
-            totalSpent += t.amount;
-            if (t.bucket === "Thiết yếu") actNeeds += t.amount;
-            else if (t.bucket === "Sở thích") actWants += t.amount;
-            else actOther += t.amount;
-
-            if (t.date === todayStr) spentToday += t.amount;
+            if (t.bucket === 'Thiết yếu') spentNeeds += t.amt;
+            else if (t.bucket === 'Sở thích') spentWants += t.amt;
+            else spentOther += t.amt;
+            if (t.date === todayStr()) spentToday += t.amt;
         });
 
-        // Định mức lý thuyết
-        const idNeeds = totalIncome * 0.5;
-        const idWants = totalIncome * 0.3;
-        const idInvest = totalIncome * 0.2;
-        const idLiquid80 = totalIncome * 0.8;
+        // Tính toán Budget
+        const limitNeeds = totalInc * 0.5;
+        const limitWants = totalInc * 0.3;
+        const limit80 = totalInc * 0.8;
+        const avail = limit80 - (spentNeeds + spentWants + spentOther);
 
-        // Xử lý Ngày nhận lương đợt tới
-        let paydayStr = state.paydays[curMonth];
-        if (!paydayStr) {
-            // Mặc định ngày cuối tháng
+        // Daily Burn Rate
+        let payday = state.paydays[curMonth];
+        if (!payday) {
             const [y, m] = curMonth.split('-');
-            const lastDay = new Date(y, m, 0).getDate();
-            paydayStr = `${curMonth}-${lastDay}`;
+            payday = new Date(y, m, 0).toISOString().split('T')[0];
         }
-        document.getElementById('next-payday').value = paydayStr;
+        document.getElementById('next-payday').value = payday;
 
-        // Tính số ngày còn lại
-        const tdyDate = new Date(todayStr);
-        const payDate = new Date(paydayStr);
-        let remDays = Math.ceil((payDate - tdyDate) / (1000 * 60 * 60 * 24));
+        const diffTime = new Date(payday) - new Date(todayStr());
+        let remDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         if (remDays <= 0) remDays = 1;
 
-        // Tính Burn Rate
-        const remLiquid = idLiquid80 - (actNeeds + actWants + actOther);
-        let dailyLimit = remLiquid > 0 ? Math.floor(remLiquid / remDays / 1000) * 1000 : 0;
+        const dailyLimit = avail > 0 ? Math.floor(avail / remDays / 1000) * 1000 : 0;
 
-        // Update UI Text
-        document.getElementById('m-budget80').innerText = formatMoney(idLiquid80) + ' đ';
-        document.getElementById('m-available').innerText = formatMoney(remLiquid) + ' đ';
-        document.getElementById('m-limit-title').innerText = `Hạn mức (Còn ${remDays} ngày)`;
-        document.getElementById('m-daily-limit').innerText = formatMoney(dailyLimit) + ' đ/ngày';
-        document.getElementById('m-spent-today').innerText = formatMoney(spentToday) + ' đ';
-
-        // Delta (Dư / Lố)
-        const deltaEl = document.getElementById('m-delta');
-        if (remLiquid < 0) {
-            deltaEl.innerHTML = '<span class="delta-bad">🚨 CHÁY TÚI!</span>';
-        } else if (spentToday <= dailyLimit) {
-            deltaEl.innerHTML = `<span class="delta-good">↓ Còn dư ${formatMoney(dailyLimit - spentToday)} đ</span>`;
-        } else {
-            deltaEl.innerHTML = `<span class="delta-bad">↑ Lố ${formatMoney(spentToday - dailyLimit)} đ</span>`;
-        }
-
-        // Progress bars
-        document.getElementById('bar-needs-text').innerText = `${formatMoney(actNeeds)} / ${formatMoney(idNeeds)} đ`;
-        document.getElementById('bar-wants-text').innerText = `${formatMoney(actWants)} / ${formatMoney(idWants)} đ`;
+        // Cập nhật giao diện
+        document.getElementById('val-avail').innerText = formatVND(avail);
+        document.getElementById('val-daily').innerText = formatVND(dailyLimit);
+        document.getElementById('burn-title').innerText = `Hạn mức (Còn ${remDays} ngày)`;
         
-        document.getElementById('bar-needs').style.width = Math.min((actNeeds / (idNeeds || 1)) * 100, 100) + '%';
-        document.getElementById('bar-wants').style.width = Math.min((actWants / (idWants || 1)) * 100, 100) + '%';
+        document.getElementById('txt-needs').innerText = `${formatVND(spentNeeds)} / ${formatVND(limitNeeds)}`;
+        document.getElementById('bar-needs').style.width = Math.min((spentNeeds/limitNeeds)*100 || 0, 100) + '%';
+        
+        document.getElementById('txt-wants').innerText = `${formatVND(spentWants)} / ${formatVND(limitWants)}`;
+        document.getElementById('bar-wants').style.width = Math.min((spentWants/limitWants)*100 || 0, 100) + '%';
+        
+        document.getElementById('val-invest').innerText = formatVND(totalInc * 0.2);
 
-        document.getElementById('box-invest').innerText = formatMoney(idInvest) + ' đ';
-        document.getElementById('box-other').innerText = formatMoney(actOther) + ' đ';
-        document.getElementById('total-spent').innerText = formatMoney(totalSpent) + ' đ';
-    }
-
-    function renderTable() {
-        const curMonth = document.getElementById('report-month').value;
-        const tbody = document.getElementById('tx-table-body');
+        // Render Table
+        const tbody = document.getElementById('tx-history');
         tbody.innerHTML = '';
-
-        // Filter and reverse for newest first
-        const monthTx = state.transactions
-            .filter(t => getMonthStr(t.date) === curMonth)
-            .reverse();
-
-        monthTx.forEach(t => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${t.date}</td>
-                    <td>${t.category}</td>
-                    <td>${t.desc}</td>
-                    <td style="text-align:right;">${formatMoney(t.amount)}</td>
-                </tr>
-            `;
+        monthTx.reverse().forEach(t => {
+            tbody.innerHTML += `<tr><td>${t.date.split('-')[2]}</td><td>${t.cat}</td><td>${formatVND(t.amt)}</td></tr>`;
         });
     }
 
-    function resetData() {
-        if(confirm("🚨 CẢNH BÁO: Hành động này sẽ xóa sạch toàn bộ lịch sử chi tiêu. Không thể hoàn tác. Vẫn tiếp tục?")) {
-            state.transactions = [];
-            saveState();
-            renderUI();
-        }
+    function showLoading(show) {
+        document.getElementById('loading-overlay').style.visibility = show ? 'visible' : 'hidden';
     }
 
-    // Run init on load
-    window.onload = init;
+    // Khởi tạo
+    window.onload = () => {
+        document.getElementById('view-month').value = getMonthKey(todayStr());
+        document.getElementById('tx-date').value = todayStr();
+        loadData();
+    };
 </script>
 
 </body>
