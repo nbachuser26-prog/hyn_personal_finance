@@ -22,6 +22,7 @@
         .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; padding-bottom: 80px; }
         @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
         
+        /* CÁC THÀNH PHẦN UI CƠ BẢN */
         .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px 25px; background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
         .header-top h1 { margin: 0; font-size: 1.3rem; color: var(--accent); outline: none; cursor: text; }
         .btn-icon { background: var(--accent-light); color: var(--accent); border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
@@ -31,11 +32,7 @@
         h2 { margin-top: 0; color: var(--text); font-size: 1.15rem; border-bottom: 2px solid var(--accent-light); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; }
         
         label { display: block; margin: 15px 0 6px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select, button { 
-            width: 100%; padding: 14px; border-radius: 14px; border: 2px solid var(--border); 
-            background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem;
-            font-family: inherit; transition: 0.2s; -webkit-appearance: none;
-        }
+        input, select, button { width: 100%; padding: 14px; border-radius: 14px; border: 2px solid var(--border); background: var(--bg); color: var(--text); box-sizing: border-box; font-size: 1rem; font-family: inherit; transition: 0.2s; -webkit-appearance: none; }
         input:focus, select:focus { outline: none; border-color: var(--accent); }
         
         button { cursor: pointer; background: var(--accent); color: white; border: none; font-weight: 800; margin-top: 15px; box-shadow: 0 6px 20px var(--accent-light); }
@@ -55,18 +52,33 @@
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         th, td { text-align: left; padding: 14px 10px; border-bottom: 1px solid var(--border); }
         
-        #settings-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1000; display: none;
-        }
+        #settings-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; display: none; }
         .modal-content { background: var(--panel); padding: 30px; border-radius: 28px; width: 90%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        
         .chart-container { height: 250px; margin-top: 20px; }
+
+        /* MÀN HÌNH ĐĂNG NHẬP */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #login-box {
+            background: var(--panel); padding: 40px; border-radius: var(--radius);
+            box-shadow: var(--shadow); width: 85%; max-width: 350px; text-align: center;
+        }
     </style>
 </head>
 <body>
+
+<div id="login-screen">
+    <div id="login-box">
+        <h1 id="login-logo-title" style="color: var(--accent); margin-top:0;">🌸 Tài chính Cá nhân</h1>
+        <p style="color: var(--text-muted); font-size:0.9rem; margin-bottom:25px;">Nhập mã PIN để mở khóa</p>
+        <input type="password" id="pin-input" placeholder="••••••" style="text-align:center; font-size:1.5rem; letter-spacing:10px; margin-bottom:15px;" inputmode="numeric">
+        <button onclick="checkLogin()" id="btn-login">Mở Khóa</button>
+        <p id="login-error" style="color: #ff4d4f; font-weight:bold; display:none; margin-top:15px;">Sai mã PIN!</p>
+    </div>
+</div>
 
 <div id="settings-modal" onclick="if(event.target.id==='settings-modal') closeSettings()">
     <div class="modal-content">
@@ -91,11 +103,12 @@
             <option value="'Comfortaa', sans-serif">Comfortaa</option>
             <option value="system-ui">Hệ thống</option>
         </select>
-        <button onclick="closeSettings()" style="margin-top:25px">Hoàn tất</button>
+        <button class="btn-outline btn-danger" onclick="logout()" style="margin-top:20px; width:100%;">Đăng xuất khỏi thiết bị</button>
+        <button onclick="closeSettings()" style="margin-top:15px">Hoàn tất</button>
     </div>
 </div>
 
-<div class="container">
+<div class="container" id="app-container" style="display:none;">
     <div class="header-top" style="grid-column: 1 / -1;">
         <h1 id="app-title" contenteditable="true" onblur="updateSettingsLocal()">🌸 Tài chính Cá nhân</h1>
         <button class="btn-icon" onclick="document.getElementById('settings-modal').style.display='flex'">⚙️</button>
@@ -105,7 +118,6 @@
         <div class="section">
             <h2>💰 Nguồn Thu <button class="btn-outline btn-small" onclick="addIncomeField()">+ Thêm</button></h2>
             <div id="income-inputs"></div>
-            <button onclick="sync()">💾 Lưu thu nhập</button>
         </div>
 
         <div class="section">
@@ -125,7 +137,7 @@
                     <option value="☕ Cafe/Trà sữa|Cá nhân">☕ Cafe / Trà sữa</option>
                     <option value="🎮 Hẹn hò/Chơi|Cá nhân">🍻 Đi chơi / Hẹn hò</option>
                     <option value="🎁 Hoa tươi/Quà tặng|Cá nhân">🎁 Hoa tươi / Quà tặng</option>
-                    <option value="👗 Mua sắm/Quần áo|Cá nhân">👗 Mua sắm / Quần áo</option>
+                    <option value="👗 Mua sắm|Cá nhân">👗 Mua sắm quần áo</option>
                 </optgroup>
                 <option value="🔄 Khác|Khác">🔄 Các khoản khác</option>
             </select>
@@ -165,7 +177,7 @@
         </div>
 
         <div class="section">
-            <h2>📈 Tổng quan năm <span id="year-label">2026</span></h2>
+            <h2>📈 Tổng quan năm <span id="year-label"></span></h2>
             <div class="chart-container"><canvas id="yearChart"></canvas></div>
         </div>
 
@@ -179,7 +191,7 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwmv_pzJ6Q9Md_eAxtnQDhI9G6OD9j2eSz8gBbhGCueyyD6wS8CgnuZiNFv2pV6LkedqQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwGKlp3GTir1lorsEpqPgVQFpzNSu9HEdPlmtyqpwVdqgzjZZtKFCDPhNaKV3XsK1_Znw/exec";
     let state = { incomes: {}, transactions: [], settings: { theme: 'system', color: 'pink', font: 'Quicksand', title: '🌸 Tài chính Cá nhân', paydays: {} } };
     let myChart = null;
 
@@ -190,40 +202,120 @@
         red: { hex: '#ff4b2b', light: 'rgba(255,75,43,0.15)' }
     };
 
-    // --- ⚡ SPEED OPTIMIZATION: LOAD LOCAL FIRST ---
-    function fastLoad() {
+    // --- ⚡ FIXED: HIỂN THỊ CÁC THIẾT LẬP GIAO DIỆN TỪ CACHE NGAY LẬP TỨC (BAO GỒM CẢ LOGO) ---
+    function tryApplyCachedSettings() {
         const local = localStorage.getItem('finance_cache');
         if (local) {
-            state = JSON.parse(local);
-            applySettingsUI();
-            renderIncomeInputs();
-            renderUI();
+            try {
+                const cachedState = JSON.parse(local);
+                if (cachedState.settings) {
+                    state.settings = cachedState.settings; // Chỉ cập nhật phần settings
+                    // Áp dụng CSS/Title ngay lập tức lên màn hình đăng nhập
+                    const s = state.settings;
+                    const theme = s.theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : s.theme;
+                    document.documentElement.setAttribute('data-theme', theme);
+                    const root = document.documentElement;
+                    root.style.setProperty('--accent', COLORS[s.color].hex);
+                    root.style.setProperty('--accent-light', COLORS[s.color].light);
+                    root.style.setProperty('--font-main', s.font.includes(',') ? s.font : `'${s.font}', sans-serif`);
+                    
+                    // FIXED: Sét tiêu đề động lên màn hình đăng nhập!
+                    document.getElementById('login-logo-title').innerText = s.title;
+                }
+            } catch(e) {}
         }
     }
 
-    async function loadData() {
+    // --- AUTHENTICATION LOGIC ---
+    async function checkLogin() {
+        const pin = document.getElementById('pin-input').value;
+        const btn = document.getElementById('btn-login');
+        const err = document.getElementById('login-error');
+        
+        if(!pin) return;
+        btn.innerText = "Đang kiểm tra...";
+        err.style.display = 'none';
+
         try {
-            const res = await fetch(API_URL);
+            const res = await fetch(API_URL + "?pin=" + pin);
             const cloudData = await res.json();
+            
+            if (cloudData.error) {
+                err.style.display = 'block';
+                btn.innerText = "Mở Khóa";
+                document.getElementById('pin-input').value = '';
+                return;
+            }
+
+            // Đăng nhập thành công
+            localStorage.setItem('finance_pin', pin);
+            if (cloudData.transactions) state = cloudData;
+            // Đảm bảo settings được kéo về
+            if (!state.settings) state.settings = { theme: 'system', color: 'pink', font: 'Quicksand', title: '🌸 Tài chính Cá nhân', paydays: {} };
+            
+            initApp();
+        } catch (e) {
+            err.innerText = "Lỗi kết nối mạng!";
+            err.style.display = 'block';
+            btn.innerText = "Mở Khóa";
+        }
+    }
+
+    async function autoLogin() {
+        const savedPin = localStorage.getItem('finance_pin');
+        if (!savedPin) return; // Hiện màn hình đăng nhập (đã được tryApplyCachedSettings xử lý giao diện)
+        
+        // Fast load local cache trước cho mượt
+        const local = localStorage.getItem('finance_cache');
+        if (local) {
+            state = JSON.parse(local);
+            initApp();
+        }
+
+        // Kéo data mới ngầm
+        try {
+            const res = await fetch(API_URL + "?pin=" + savedPin);
+            const cloudData = await res.json();
+            if (cloudData.error) {
+                localStorage.removeItem('finance_pin');
+                location.reload(); 
+                return;
+            }
             if (cloudData.transactions) {
                 state = cloudData;
-                if (!state.settings) state.settings = { theme: 'system', color: 'pink', font: 'Quicksand', title: '🌸 Tài chính Cá nhân', paydays: {} };
                 localStorage.setItem('finance_cache', JSON.stringify(state));
                 applySettingsUI();
                 renderIncomeInputs();
                 renderUI();
             }
-        } catch (e) {
-            console.log("Offline Mode");
-        }
+        } catch (e) {}
     }
 
+    function logout() {
+        localStorage.removeItem('finance_pin');
+        localStorage.removeItem('finance_cache');
+        location.reload();
+    }
+
+    function initApp() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'grid';
+        localStorage.setItem('finance_cache', JSON.stringify(state));
+        applySettingsUI();
+        renderIncomeInputs();
+        renderUI();
+    }
+
+    // --- SYNC NGẦM KÈM MÃ PIN ---
     async function sync() {
+        const pin = localStorage.getItem('finance_pin');
+        if(!pin) return;
         try {
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify(state) });
-        } catch (e) {
-            console.log("Sync Error");
-        }
+            await fetch(API_URL, { 
+                method: 'POST', 
+                body: JSON.stringify({ pin: pin, data: state }) 
+            });
+        } catch (e) { console.log("Sync Background Error"); }
     }
 
     // --- UI SETTINGS ---
@@ -234,7 +326,11 @@
         root.style.setProperty('--accent', COLORS[s.color].hex);
         root.style.setProperty('--accent-light', COLORS[s.color].light);
         root.style.setProperty('--font-main', s.font.includes(',') ? s.font : `'${s.font}', sans-serif`);
+        
+        // FIXED: Đồng bộ cả 2 nơi
+        document.getElementById('login-logo-title').innerText = s.title; 
         document.getElementById('app-title').innerText = s.title;
+        
         document.getElementById('set-theme').value = s.theme;
         document.getElementById('set-color').value = s.color;
         document.getElementById('set-font').value = s.font;
@@ -318,13 +414,18 @@
 
         const history = document.getElementById('tx-history');
         history.innerHTML = '';
-        monthTx.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(t => {
-            history.innerHTML += `<tr>
-                <td style="font-weight:800">${t.date.split('-')[2]}</td>
-                <td>${t.cat.split(' ')[0]} <br><small>${t.note}</small></td>
-                <td style="text-align:right"><b>${t.amt.toLocaleString()}</b> <button onclick="deleteTx(${t.id})" style="width:auto; margin:0; padding:4px 8px; background:none; color:red; box-shadow:none; font-size:1.2rem;">×</button></td>
-            </tr>`;
-        });
+        if (monthTx.length === 0) {
+            history.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--text-muted); padding:20px;">Trống</td></tr>';
+        } else {
+            monthTx.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(t => {
+                const day = t.date.split('-')[2];
+                history.innerHTML += `<tr>
+                    <td style="font-weight:800">${day}</td>
+                    <td>${t.cat.split(' ')[0]} <br><small>${t.note}</small></td>
+                    <td style="text-align:right"><b>${t.amt.toLocaleString()}</b> <button onclick="deleteTx(${t.id})" style="width:auto; margin:0; padding:4px 8px; background:none; color:red; box-shadow:none; font-size:1.2rem;">×</button></td>
+                </tr>`;
+            });
+        }
         renderChart(m.split('-')[0]);
     }
 
@@ -342,11 +443,24 @@
         });
     }
 
+    // Bắt sự kiện Enter khi nhập PIN
+    document.getElementById("pin-input").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            checkLogin();
+        }
+    });
+
     window.onload = () => {
         document.getElementById('view-month').value = new Date().toISOString().substring(0, 7);
         document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
-        fastLoad();
-        loadData();
+        
+        // --- FIXED FLOW ---
+        // 1. Ốp thiết lập từ cache ngay lập tức (để hiện logo đúng tên)
+        tryApplyCachedSettings();
+        
+        // 2. Thử tự động đăng nhập ngầm
+        autoLogin();
     };
 </script>
 </body>
